@@ -4,6 +4,7 @@ import cgi
 import cgitb
 import json
 import os
+import sqlite3
 import sys
 
 import controller
@@ -11,6 +12,11 @@ import repository
 
 cgitb.enable()
 
+def dict_factory(cursor, row):
+    d = {}
+    for idx,col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
 response = {"code": 400, "message": "Bad Request"}
 
@@ -20,7 +26,9 @@ try:
 	actionName = os.environ['REQUEST_METHOD'].lower()
 
 	controller = getattr(controller, objectType)()
-	controller.setRepository(getattr(repository, objectType)())
+	conn = sqlite3.connect('data/vid-pl.db')
+	conn.row_factory = dict_factory
+	controller.setRepository(getattr(repository, objectType)(conn))
 
 	response = getattr(controller, actionName)(request)
 except:
