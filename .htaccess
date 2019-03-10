@@ -1,0 +1,5 @@
+DirectoryIndex index.py
+Options ExecCGI
+AddHandler cgi-script .py
+Order allow,deny
+Allow from all
