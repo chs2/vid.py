@@ -31,12 +31,14 @@ try:
 	controller.setRepository(getattr(repository, objectType)(conn))
 
 	response = getattr(controller, actionName)(request)
-except:
+except Exception as e:
 	response["code"] = 500
 	response["message"] = "Internal Server Error"
+	response["data"] = str(e)
 	
 print "Status: {} {}".format(response["code"], response["message"])
 print "Content-Type: application/json"
 print ""
+
 print json.dumps(response)
 

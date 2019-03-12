@@ -1,6 +1,6 @@
 from abc import ABCMeta
 
-class Abstract:
+class Abstract(object):
 	__metadata__ = ABCMeta
 
 	def setRepository(self, repository):
@@ -24,6 +24,14 @@ class Video(Abstract):
 		return json.loads(sys.stdin.read())
 
 class Playlist(Abstract):
+	def get(self, request):
+		response = super(Playlist, self).get(request)
+
+		if len(request) > 2:
+			response["data"] = self.repository.getPlaylistVideos(request[1])
+
+		return response
+
 	def put(self, request):
 		import json
 		import sys

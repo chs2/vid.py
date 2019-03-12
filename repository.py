@@ -1,7 +1,7 @@
 from abc import ABCMeta
 import sqlite3
   
-class Abstract:
+class Abstract(object):
         __metadata__ = ABCMeta
 
 	def __init__(self, conn):
@@ -26,6 +26,18 @@ class Abstract:
 		return cursor.fetchall()
 
 class Playlist(Abstract):
+	def getPlaylistVideos(self, playlistId):
+		cursor = self.conn.cursor()
+		cursor.execute((""
+			"select video.* "
+			"from video_playlist "
+			"join video on video_playlist.video_id = video.id "
+			"where video_playlist.playlist_id = {} "
+			"order by video_playlist.rank asc"
+			"").format(playlistId))
+
+		return cursor.fetchall()
+
 	def store(self):
 		return {}
 
