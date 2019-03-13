@@ -12,7 +12,7 @@ class Abstract(object):
 		entityName = entityName[0].lower() + entityName[1:]
 
 		cursor = self.conn.cursor()
-		cursor.execute("select * from " + entityName + " where id = {}".format(id))
+		cursor.execute("select * from {} where id = {}".format(entityName, id))
 
 		return cursor.fetchone()
 
@@ -21,7 +21,7 @@ class Abstract(object):
 		entityName = entityName[0].lower() + entityName[1:]
 
 		cursor = self.conn.cursor()
-		cursor.execute("select * from " + entityName)
+		cursor.execute("select * from {}".format(entityName))
 
 		return cursor.fetchall()
 
@@ -37,6 +37,14 @@ class Playlist(Abstract):
 			"").format(playlistId))
 
 		return cursor.fetchall()
+
+	def delete(self, id):
+		with self.conn:
+			self.conn.execute("delete from video_playlist where playlist_id = {}".format(id))
+			self.conn.execute("delete from playlist where id = {}".format(id))
+
+	def removeVideo(self, playlistId, videoId):
+		pass
 
 	def store(self):
 		return {}
