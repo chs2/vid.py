@@ -23,12 +23,28 @@ class Abstract(object):
 
 		return response
 
-class Video(Abstract):
 	def put(self, request):
 		import json
 		import sys
 
-		return json.loads(sys.stdin.read())
+		if len(request) == 2:
+			entity = self.repository.getOneById(request[1])
+
+			if entity is None:
+				raise exception.Http404
+
+		else:
+			entity = {}
+
+		data = json.loads(sys.stdin.read())
+
+		if "id" in data:
+			raise exception.Http400
+
+		for key in data:
+			entity[key] = data[key]
+
+		return {"code": 201, "message": "Created", "data": self.repository.store(entity)}
 
 class Playlist(Abstract):
 	def get(self, request):
@@ -55,9 +71,3 @@ class Playlist(Abstract):
 			return response
 
 		raise exception.Http400
-
-	def put(self, request):
-		import json
-		import sys
-
-		return json.loads(sys.stdin.read())

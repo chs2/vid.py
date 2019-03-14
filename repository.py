@@ -25,6 +25,30 @@ class Abstract(object):
 
 		return cursor.fetchall()
 
+	def store(self, data):
+		entityName = self.__class__.__name__
+		entityName = entityName[0].lower() + entityName[1:]
+
+		if "id" in data:
+			query = "update {} set ".format(entityName)
+
+			for key in data:
+				if key != "id":
+					query += key + " = :" + key + " "
+
+			query += "where id = :id"
+		else:
+			query = "insert into {}({}) values ({})".format(entityName, ", ".join(data.keys()), ":" + ", :".join(data.keys()))
+
+		with self.conn:
+			cursor = self.conn.cursor()
+			cursor.execute(query, data)
+
+		if "id" not in data:
+			data["id"] = cursor.lastrowid
+
+		return data
+
 class Playlist(Abstract):
 	def getPlaylistVideos(self, playlistId):
 		cursor = self.conn.cursor()
@@ -45,10 +69,3 @@ class Playlist(Abstract):
 
 	def removeVideo(self, playlistId, videoId):
 		pass
-
-	def store(self):
-		return {}
-
-class Video(Abstract):
-	def store(self):
-		return {}
