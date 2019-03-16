@@ -62,10 +62,48 @@ class Playlist(Abstract):
 
 		return cursor.fetchall()
 
-	def delete(self, id):
+	def delete(self, playlist):
 		with self.conn:
-			self.conn.execute("delete from video_playlist where playlist_id = {}".format(id))
-			self.conn.execute("delete from playlist where id = {}".format(id))
+			self.conn.execute("delete from video_playlist where playlist_id = :id", playlist)
+			self.conn.execute("delete from playlist where id = :id", playlist)
 
-	def removeVideo(self, playlistId, videoId):
-		pass
+	def addVideo(self, playlist, videoId, rank):
+		with self.conn:
+			cursor = self.conn.cursor()
+
+			data = {"playlist_id": playlist["id"], "video_id": videoId, "rank": rank}
+
+			if rank is None:
+				cursor.execute("select max(rank) as rank from video_playlist where playlist_id = :playlist_id", data)
+				row = cursor.fetchone()
+
+				if row["rank"] is None:
+					data["rank"] = 0
+				else:
+					data["rank"] = 1 + row["rank"]
+			else:
+				cursor.execute("update video_playlist set rank = rank + 1 where playlist_id = :playlist_id and rank >= :rank", data)
+
+			cursor.execute("insert into video_playlist(playlist_id, video_id, rank) values(:playlist_id, :video_id, :rank)", data)
+
+			return True
+
+	def removeVideo(self, playlist, videoId):
+		with self.conn:
+			cursor = self.conn.cursor()
+
+			data = {"playlist_id": playlist["id"], "video_id": videoId}
+
+			cursor.execute("select rank from video_playlist where playlist_id = :playlist_id and video_id = :video_id", data)
+			row = cursor.fetchone()
+
+			data["rank"] = row["rank"]
+
+			self.conn.execute("delete from video_playlist where playlist_id = :playlist_id and video_id = :video_id", data)
+
+			cursor.execute("update video_playlist set rank = rank - 1 where playlist_id = :playlist_id and rank > :rank", data)
+
+			return True
+
+class Video(Abstract):
+	pass
