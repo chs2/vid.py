@@ -22,8 +22,14 @@ def dict_factory(cursor, row):
 response = {"code": 400, "message": "Bad Request"}
 
 try:
+	if "HTTP_ACCEPT" not in os.environ:
+		raise exception.Http400
+
 	if "application/json" not in os.environ['HTTP_ACCEPT'] and "*/*" not in os.environ['HTTP_ACCEPT']:
 		raise exception.Http406
+
+	if "PATH_INFO" not in os.environ:
+		raise exception.Http400
 
 	request = os.environ['PATH_INFO'].strip('/').split('/')
 
