@@ -2,6 +2,7 @@
 
 import cgi
 import cgitb
+import traceback
 import json
 import os
 import sqlite3
@@ -57,10 +58,11 @@ try:
 except exception.Http as e:
 	response["code"] = e.code
 	response["message"] = e.message
-except Exception as e:
+except BaseException as e:
 	response["code"] = 500
 	response["message"] = "Internal Server Error"
-	response["data"] = repr(e)
+	response["strerror"] = repr(e)
+	response["trace"] = traceback.format_exc()
 	
 print "Status: {} {}".format(response["code"], response["message"])
 print "Content-Type: application/json"
