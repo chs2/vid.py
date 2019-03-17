@@ -33,7 +33,7 @@ try:
 
 	request = os.environ['PATH_INFO'].strip('/').split('/')
 
-	if len(request) == 0:
+	if len(request) == 0 or len(request[0]) == 0:
 		raise exception.Http400
 
 	objectType = request[0][0].upper() + request[0][1:]
