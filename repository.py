@@ -7,30 +7,27 @@ class Abstract(object):
 	def __init__(self, conn):
 		self.conn = conn
 
-	def getOneById(self, id):
+	def getEntityName(self):
 		entityName = self.__class__.__name__
 		entityName = entityName[0].lower() + entityName[1:]
 
+		return entityName
+
+	def getOneById(self, id):
 		cursor = self.conn.cursor()
-		cursor.execute("select * from {} where id = {}".format(entityName, id))
+		cursor.execute("select * from {} where id = {}".format(self.getEntityName(), id))
 
 		return cursor.fetchone()
 
 	def getAll(self, limit = 50, offset = 0):
-		entityName = self.__class__.__name__
-		entityName = entityName[0].lower() + entityName[1:]
-
 		cursor = self.conn.cursor()
-		cursor.execute("select * from {}".format(entityName))
+		cursor.execute("select * from {}".format(self.getEntityName()))
 
 		return cursor.fetchall()
 
 	def store(self, data):
-		entityName = self.__class__.__name__
-		entityName = entityName[0].lower() + entityName[1:]
-
 		if "id" in data:
-			query = "update {} set ".format(entityName)
+			query = "update {} set ".format(self.getEntityName())
 
 			for key in data:
 				if key != "id":
@@ -38,7 +35,7 @@ class Abstract(object):
 
 			query += "where id = :id"
 		else:
-			query = "insert into {}({}) values ({})".format(entityName, ", ".join(data.keys()), ":" + ", :".join(data.keys()))
+			query = "insert into {}({}) values ({})".format(self.getEntityName(), ", ".join(data.keys()), ":" + ", :".join(data.keys()))
 
 		with self.conn:
 			cursor = self.conn.cursor()
